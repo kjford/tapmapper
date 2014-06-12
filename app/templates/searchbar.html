@@ -1,0 +1,14 @@
+{% extends "layout/base.html" %}
+{% block content %}
+  <div id='wrap'>
+  <h1>TapMapper</h1>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <form action="{{ url_for('showresults') }}" method=get>
+    <dl>
+      <dt>Enter City, State:
+      <dd><input type=text name=city>
+      <dd><input type=submit value=GetBeer>
+    </dl>
+  </form>
+  </div>
+{% endblock %}

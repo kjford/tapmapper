@@ -1,0 +1,11 @@
+.DS_Store
+venv/
+app/static/vendor
+node_modules
+*.pyc
+*.csv
+*.cfg
+*.log
+savefiles/
+slidedecks/
+backups/

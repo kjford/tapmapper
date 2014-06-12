@@ -1,0 +1,38 @@
+# create table for beer rating data
+# with column names preserved
+CREATE TABLE IF NOT EXISTS RateBeer (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    beer_brewerid INT,
+    review_time INT,
+    review_overall DOUBLE,
+    review_text TEXT,
+    review_aroma DOUBLE,
+    review_appearance DOUBLE,
+    review_profilename VARCHAR(100),
+    beer_style VARCHAR(150),
+    review_palate DOUBLE,
+    review_taste DOUBLE,
+    beer_name VARCHAR(200),
+    beer_abv DOUBLE,
+    beer_beerid INT);
+
+# Add data
+LOAD DATA LOCAL INFILE 'beer_reviews_with_text.csv' INTO TABLE RateBeer 
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (
+    beer_brewerid,
+    review_time,
+    review_overall,
+    review_text,
+    review_aroma,
+    review_appearance,
+    review_profilename,
+    beer_style,
+    review_palate,
+    review_taste,
+    beer_name,
+    beer_abv,
+    beer_beerid)

@@ -1,0 +1,57 @@
+#Construct beer, city tf-idf
+
+# create table
+DROP TABLE IF EXISTS tfidf;
+CREATE TABLE IF NOT EXISTS tfidf (
+tfidf_id INT AUTO_INCREMENT PRIMARY KEY,
+beerid INT,
+city VARCHAR(150),
+TF DOUBLE,
+IDF DOUBLE,
+TFIDF DOUBLE);
+
+# compute and insert data
+
+INSERT INTO tfidf
+(beerid,city,TF,IDF,TFIDF)
+  SELECT tf.ID,tf.CITY,tf.TF,idf.IDF,tf.TF*idf.IDF as TFIDF
+  FROM (
+    # term frequency (term,doc): #ofterm(i) in doc/#ofterms in doc
+    SELECT b.ubeername, a.ID, a.CITY, a.TF, a.BEERCOUNT, a.CITYCOUNT
+    FROM beers_unique as b
+    JOIN (
+      SELECT pt.beerid as ID, loc.city as CITY, COUNT(pt.beerid)/loc.tot as TF,
+      COUNT(pt.beerid) as BEERCOUNT, loc.tot as CITYCOUNT
+      FROM processedtweets as pt
+      JOIN (
+        SELECT pt2.tweetloc as city, COUNT(*) as tot
+        FROM processedtweets as pt2
+        GROUP BY pt2.tweetloc
+        ORDER BY COUNT(*) DESC
+      ) as loc
+      ON pt.tweetloc=loc.city
+      GROUP BY ID,CITY
+    ) as a
+    ON a.ID=b.id
+    ORDER BY a.TF DESC
+  ) as tf
+  LEFT JOIN  
+  # idf(term,doclist): 1+log(#docs/(1+docs with term(i))
+  # uses a cartesian join
+  (
+  SELECT b1.ID, 1+LOG(c.totdoc/(1+a1.hasterm)) as IDF, c.totdoc
+  FROM beers_unique as b1
+  JOIN (
+    SELECT pt3.beerid, pt3.tweetloc as LOC, COUNT(*) as hasterm
+    FROM processedtweets as pt3
+    GROUP BY 1
+  ) AS a1
+  ON a1.beerid=b1.id
+  # cartesian join with single column for normalizing by number of 'docs'
+  JOIN (
+    SELECT COUNT(DISTINCT pt4.tweetloc) AS totdoc
+    FROM processedtweets as pt4
+  ) AS c
+  ORDER BY IDF
+  ) as idf
+  ON tf.ID=idf.ID

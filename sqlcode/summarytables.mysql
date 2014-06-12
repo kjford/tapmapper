@@ -1,0 +1,28 @@
+# create summary tables from RateBeer database
+
+# id brewerid beername table
+DROP TABLE IF EXISTS beers;
+CREATE TABLE IF NOT EXISTS beers (
+    id INT NOT NULL PRIMARY KEY,
+    brewerid INT,
+    beername VARCHAR(200)
+    );
+
+INSERT INTO beers
+    (id, brewerid, beername)
+    SELECT DISTINCT beer_beerid, beer_brewerid, beer_name FROM RateBeer;
+
+# counts and average rating for each beer
+DROP TABLE IF EXISTS revstats;
+CREATE TABLE IF NOT EXISTS revstats (
+    id INT NOT NULL PRIMARY KEY,
+    nreviews INT,
+    avgoverall DOUBLE
+    );
+
+
+INSERT INTO revstats 
+    (id, nreviews, avgoverall)
+    SELECT beer_beerid AS id, count(*) AS nreviews, AVG(review_overall) AS avgoverall
+    FROM RateBeer
+    GROUP BY beer_beerid;

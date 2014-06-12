@@ -1,0 +1,19 @@
+# add brewery info into database
+
+DROP TABLE IF EXISTS brewers;
+CREATE TABLE IF NOT EXISTS brewers (
+    brewerid INT NOT NULL PRIMARY KEY,
+    brewername VARCHAR(200),
+    location VARCHAR(200)
+    );
+
+
+LOAD DATA LOCAL INFILE 'breweries.csv' INTO TABLE brewers 
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+    (
+    brewerid,
+    brewername,
+    location);
