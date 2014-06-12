@@ -20,7 +20,7 @@ INSERT INTO tfidf
     SELECT b.ubeername, a.ID, a.CITY, a.TF, a.BEERCOUNT, a.CITYCOUNT
     FROM beers_unique as b
     JOIN (
-      SELECT pt.beerid as ID, loc.city as CITY, COUNT(pt.beerid)/loc.tot as TF,
+      SELECT pt.beerid as ID, loc.city as CITY, LOG(1+COUNT(pt.beerid)/loc.tot) as TF,
       COUNT(pt.beerid) as BEERCOUNT, loc.tot as CITYCOUNT
       FROM processedtweets as pt
       JOIN (

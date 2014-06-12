@@ -6,30 +6,28 @@ import jinja2
 
 
 # ROUTING/VIEW FUNCTIONS
-@app.route('/', methods=['GET'])
-def index():
-    # Show the start page
-    if request.method=='GET':
-        return redirect(url_for('showresults'))
-    return render_template('searchbar.html')
-
-
-
-@app.route('/table', methods=['GET'])
-def showresults():
-    # Create database connection
+@app.route('/', methods=['GET','POST'])
+def search():
+    if request.method == 'POST':
+        var_dict = {
+            "city": request.form["city"]
+        }
+        print 'here'
+    else:
+        var_dict={}
+    return render_template('searchbar.html', settings=var_dict)
+    
+@app.route('/results', methods=['POST'])
+def showresults():  
     con = con_db(host, port, user, passwd, db)
-
     var_dict = {
         "city": request.form["city"]
     }
-
     # Query the database
     data = query_db(con, var_dict)
-
     # Add data to dictionary
     var_dict["data"] = data
-
+        
     return render_template('table.html', settings=var_dict)
 
 
