@@ -8,13 +8,14 @@ add to processedtweets table (create if doesn't exist)
 import pandas as pd
 import pymysql as mdb
 import numpy as np
+import string
 from authent import dbauth as authsql
 
 # clunky hack that needs work:
 # start processing mysql data base from id >= minid
 with open('rawtweetprocid.txt','r') as f:
     minid=int(f.read())
-
+print 'Loading data'
 con=mdb.connect(**authsql)
 with con:
     # create table for processed tweets
@@ -32,8 +33,10 @@ with con:
         """)
     # get beer names and ids
     beersql='''
-    SELECT id, ubeername
-    FROM beers_unique
+    SELECT b.id, b.ubeername, r.nreviews
+    FROM beers_unique AS b
+    JOIN revstats AS r
+    ON b.id=r.id
     '''
     beerdf=pd.io.sql.read_frame(beersql,con)
     # grab rawtweets
@@ -43,58 +46,75 @@ with con:
     WHERE rawid>%i
     '''%minid
     tweetdf=pd.io.sql.read_frame(tweetsql,con)
+print 'Start from index %i'%minid
+# for getting rid of punctuation
+replacerstr=string.maketrans(string.punctuation, ' '*len(string.punctuation))
 
-# search names double for loop over names and tweets
+# try removing anything in ()
+beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.split('(')[0])
+# make lower and remove punctuation
+beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.translate(replacerstr).lower().strip())
+# try substituting a few terms (this is a little biased and kludgy)
+beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.replace('india pale ale','ipa'))
+beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.replace('extra special bitter','esb'))
+# add column of string lengths
+beerdf['namelen']=beerdf.ubeername.apply(len)
+# sort beerdf by length of name string then number of nreviews
+beerdf=beerdf.sort(['namelen','nreviews'],ascending=[0,0])
+
+# create massive tweet of all tweets padded to 200 characters and squished
+print 'Making super tweet for quicker searching'
+supertweet=''
+tid=[]
+for twind,twrow in tweetdf.iterrows():
+    tid.append(twind)
+    tw=twrow['tweettext']
+    l=len(tw)
+    tw=tw+' '*(200-l)
+    supertweet+=tw
+
+
+supertweet=supertweet.translate(replacerstr).lower()
+print 'Super tweet is %i characters'%len(supertweet)
+
+print 'Seaching tweets for each beer name'
+nbeers=len(beerdf)
+count=1
+# search names: for loop over names
 for beerind,beerrow in beerdf.iterrows():
     # create strings to search against from beer names
     beern=beerrow['ubeername']
     beerid=beerrow['id']
-    # make lower
-    beern=beern.lower().strip()
-    searchstrs=[beern]
-    # try concatenating
-    if len(beern.split())>1:
-        searchstrs.append(beern.replace(' ','').strip())
-    # try removing anything in ()
-    if len(beern.split('('))>2:
-        searchstrs.append(beern.split('(')[0].strip())
-    # try substituting a few terms (this is a little biased and kludgy)
-    if beern.find('india pale ale')>0:
-        searchstrs.append(beern.replace('india pale ale','ipa'))
-    if beern.find('extra special bitter')>0:
-        searchstrs.append(beern.replace('extra special bitter','esb'))
-    # more?????
-    
-    for twind,twrow in tweetdf.iterrows():
-        # pull text of tweet
-        tweettext = twrow['tweettext']
-        hasmatch=False
-        for s in searchstrs:
-            # search against text of tweet, find terms in any order
-            if np.product([substr in tweettext for substr in s.split()])>0:
-                #if tweettext.find(s)>0: # has a match
-                hasmatch=True
-                print 'found %s in %s'%(s,tweettext)
-                break # if true then we're done
-        # if there are any matches add data to proctweets adding beer id
-        if hasmatch:
-            with con:
-                # create table for processed tweets
-                cur=con.cursor()
-                proctwsql="""
-                INSERT INTO processedtweets (
-                rawid,tweetid,tweetloc,tweettext,tweettime,hasgeo,beerid)
-                VALUES (
-                %s,%s,%s,%s,%s,%s,%s)
-                """
-                insertlist=[twrow['rawid'],twrow['tweetid'],twrow['tweetloc'],\
-                    twrow['tweettext'],twrow['tweettime'],twrow['hasgeo'],beerid]
-                cur.execute(proctwsql,insertlist)
-        # update minid for future runs
-        minid=twrow['rawid']
-        # end tweet loop
+    print '%s: %i of %i'%(beern,count,nbeers)
+    count+=1
+    # find all instances of full term
+    searching=0
+    if len(beern)>3:  
+        while True:
+            searching=supertweet.find(beern,searching+1)
+            if searching > -1:
+                # found, actual index of tweet is:
+                twindact=searching/200 #this is a floored integer
+                with con:
+                    # create table for processed tweets
+                    cur=con.cursor()
+                    proctwsql="""
+                    INSERT INTO processedtweets (
+                    rawid,tweetid,tweetloc,tweettext,tweettime,hasgeo,beerid)
+                    VALUES (
+                    %s,%s,%s,%s,%s,%s,%s)
+                    """
+                    insertlist=[int(tweetdf['rawid'][twindact]),int(tweetdf['tweetid'][twindact]),\
+                        tweetdf['tweetloc'][twindact],tweetdf['tweettext'][twindact],\
+                        tweetdf['tweettime'][twindact].to_datetime(),int(tweetdf['hasgeo'][twindact]),beerid]
+                    cur.execute(proctwsql,insertlist)
+            else:
+                break
+        # replace all instance with spaces
+        supertweet=supertweet.replace(beern,' '*len(beern))
         
-    #end beer name loop
+#end beer name loop
+minid=tweetdf['rawid'].max()
 
 # save out minid value for future use
 with open('rawtweetprocid.txt','w') as f:
