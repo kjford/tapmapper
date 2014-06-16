@@ -1,0 +1,18 @@
+#Construct city id table from zips
+# quick and dirty by taking average lat and long as center by grouping on city,state
+
+# create table
+DROP TABLE IF EXISTS uscities;
+CREATE TABLE IF NOT EXISTS uscities (
+cityid INT AUTO_INCREMENT PRIMARY KEY,
+city VARCHAR(150),
+state VARCHAR(2),
+fullname VARCHAR(152),
+lat DOUBLE,
+lng DOUBLE);
+
+INSERT INTO uscities
+(city,state,fullname,lat,lng)
+SELECT city, state, CONCAT(city,', ',state) as fullname, AVG(lat), AVG(lng)
+FROM zips
+GROUP BY city,state;

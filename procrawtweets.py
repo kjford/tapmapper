@@ -29,7 +29,8 @@ with con:
         tweettext TEXT,
         tweettime DATETIME,
         hasgeo TINYINT(1),
-        beerid INT)
+        beerid INT,
+        cityid INT)
         """)
     # get beer names and ids
     beersql='''
@@ -46,10 +47,19 @@ with con:
     WHERE rawid>%i
     '''%minid
     tweetdf=pd.io.sql.read_frame(tweetsql,con)
+    # get us cities
+    citysql='''
+    SELECT cityid, fullname
+    FROM uscities
+    '''
+    citydf = pd.io.sql.read_frame(citysql,con)
+    citylist=citydf.fullname.apply(lambda(x): x.lower()).tolist()
 print 'Start from index %i'%minid
 # for getting rid of punctuation
 replacerstr=string.maketrans(string.punctuation, ' '*len(string.punctuation))
 
+'''
+below has been moved to the rename_beers script
 # try removing anything in ()
 beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.split('(')[0])
 # make lower and remove punctuation
@@ -57,6 +67,8 @@ beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.translate(replacerstr)
 # try substituting a few terms (this is a little biased and kludgy)
 beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.replace('india pale ale','ipa'))
 beerdf['ubeername']=beerdf['ubeername'].apply(lambda(x):x.replace('extra special bitter','esb'))
+'''
+
 # add column of string lengths
 beerdf['namelen']=beerdf.ubeername.apply(len)
 # sort beerdf by length of name string then number of nreviews
@@ -95,18 +107,27 @@ for beerind,beerrow in beerdf.iterrows():
             if searching > -1:
                 # found, actual index of tweet is:
                 twindact=searching/200 #this is a floored integer
+                # make the location tag more consistent
+                rawloc=tweetdf['tweetloc'][twindact].lower().strip()
+                loc=rawloc.split(',')[0].strip() + ', '+rawloc.split(',')[1].strip()
+                # parse against us cities database
+                if loc in citylist:
+                    ci=int(citydf.cityid[citylist.index(loc)])
+                else:
+                    ci=None
                 with con:
                     # create table for processed tweets
                     cur=con.cursor()
                     proctwsql="""
                     INSERT INTO processedtweets (
-                    rawid,tweetid,tweetloc,tweettext,tweettime,hasgeo,beerid)
+                    rawid,tweetid,tweetloc,tweettext,tweettime,hasgeo,beerid,cityid)
                     VALUES (
-                    %s,%s,%s,%s,%s,%s,%s)
+                    %s,%s,%s,%s,%s,%s,%s,%s)
                     """
                     insertlist=[int(tweetdf['rawid'][twindact]),int(tweetdf['tweetid'][twindact]),\
-                        tweetdf['tweetloc'][twindact],tweetdf['tweettext'][twindact],\
-                        tweetdf['tweettime'][twindact].to_datetime(),int(tweetdf['hasgeo'][twindact]),beerid]
+                            loc,tweetdf['tweettext'][twindact],\
+                            tweetdf['tweettime'][twindact].to_datetime(),\
+                            int(tweetdf['hasgeo'][twindact]),beerid,ci]
                     cur.execute(proctwsql,insertlist)
             else:
                 break
