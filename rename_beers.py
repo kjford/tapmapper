@@ -66,13 +66,13 @@ for bn,gr in beerdf.groupby('beername'):
                 if len(brewernameshort)>3: # not that useful if the brewer name is too short
                     newname=brewernameshort+' '+bn
                     #print 'switching %s from %s to %s'%(bn,breweryname,newname)
-                    if i[1]['nreviews']>=minreviews:
+                    if int(i[1]['nreviews'])>=minreviews:
                         unames.append(newname)
                         ids.append(int(i[1]['id']))
     else:
         # looks ok
         #does it meet review number criteria
-        if gr['nreviews']>=minreviews:
+        if int(gr['nreviews'])>=minreviews:
             unames.append(bn)
             ids.append(int(gr['id']))
 # get rid of beers that are words in the top 1000 english words list
