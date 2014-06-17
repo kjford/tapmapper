@@ -3,7 +3,7 @@
 {% block content %}
   
   <div id="wrap">
-    <h2>{{settings['city']}}</h2>
+    <h2>Beers that make {{settings['city']}} unique</h2>
     <div class="container">
       <div id="table">
         <div class="table-responsive">
@@ -11,9 +11,9 @@
             <thead>
               <th>Beer</th>
               <th>Brewer</th>
-              <th>Location</th>
+              <th>Brewer Location</th>
               <th>Uniqueness Score</th>
-              <th>Rating</th>
+              <th>Beer Rating</th>
             </thead>
             <tbody>
               {% for line in settings['data'] %}

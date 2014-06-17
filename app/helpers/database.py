@@ -25,18 +25,25 @@ def query_db(con, dict):
     cur = con.cursor()
     cur.execute(
         """
-        SELECT b.beername,br.brewername,br.location, a.TFIDF, r.avgoverall
-        FROM beers AS b
+        SELECT b.beername,br.brewername,br.location, a.TFIDF, r.avgoverall,us.cityid,reg.region
+        FROM (
+        SELECT cityid
+        FROM uscities
+        WHERE fullname LIKE '{0}'
+        ) AS us
         JOIN (
-            SELECT beerid,TFIDF
-            FROM tfidf
-            WHERE city='{0}'
-        ) AS a 
+        SELECT DISTINCT p.locbinid AS region, p.cityid
+        FROM procbintweets AS p
+        ) AS reg
+        ON reg.cityid=us.cityid
+        JOIN tfidf AS a
+        ON reg.region=a.locbinid
+        JOIN beers AS b
         ON a.beerid=b.id
         JOIN brewers AS br
         ON b.brewerid=br.brewerid
         JOIN revstats AS r
-        ON b.id=r.id
+        ON b.id=r.id    
         ORDER by a.TFIDF DESC
         LIMIT 5
         """.format(search_city)
@@ -46,12 +53,11 @@ def query_db(con, dict):
     for beer in data:
         index = {}
 
-        index["name"] = beer[0]
-        index["brewer"] = beer[1]
-        index["location"] = beer[2]
-        index["tfidf"] = float(json.dumps(beer[3]))
-        index["rating"] = float(json.dumps(beer[4]))
-
+        index["name"] = beer[0].decode('latin-1','ignore')
+        index["brewer"] = beer[1].decode('latin-1','ignore')
+        index["location"] = beer[2].decode('latin-1','ignore')
+        index["tfidf"] = json.dumps(beer[3])
+        index["rating"] = json.dumps(beer[4])
         data_array.append(index)
 
     cur.close()
