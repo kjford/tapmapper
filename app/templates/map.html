@@ -1,7 +1,7 @@
 {% extends 'layout/base.html' %}
 {% block content %}
 
-    <div id='map'></div>
+    <div class='map' id='map'></div>
 
     <div id='menu'>
       <div id='find'>
@@ -14,11 +14,13 @@
 
 
 
+<!-- Search bar -->
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
 
 
-<script type=text/javascript>
+<script>
     $(function () {
         var output = $('div#score.list-group')
         var button = $('button#search.btn.btn-default')
@@ -44,10 +46,12 @@
                         var items = get_results['data']
                         var list = document.createElement('score')
                         $.each(items, function () {
-                              var a=$('<p/>')
+                            var a = $('<a/>')
                                     .addClass('list-group-item')
-                                    .text(this['name'])
+                                    .attr('href', 'http://beeradvocate.com/beer/profile/'+this['brewerid']+'/'+this['beerid'])
+                                    .html(this['name']+'<br/>'+this['brewer']+', '+this['location'])
                                     .appendTo(list)
+                            
                         })
                         output.append(list)
                     })
@@ -61,6 +65,112 @@
         });
         
     });
+</script>
+
+
+
+<!-- US map -->
+
+
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>(function() {
+
+var width = 960,
+    height = 600;
+
+var formatNumber = d3.format(",.0f");
+
+var path = d3.geo.path()
+    .projection(null);
+
+var radius = d3.scale.sqrt()
+    .domain([0, 1e6])
+    .range([0, 15]);
+
+
+
+d3.selectAll(".map").append("svg")
+    .attr("viewBox", "0 0 " + width + " " + height)
+    .attr("width", width)
+    .attr("height", height);
+
+var svgMap = d3.select("#map").select("svg"),
+    svgMapBase = d3.selectAll("#map,#map--base,#map--dot,#map--basic,#map--sorted").select("svg"),
+    svgMapDot = d3.select("#map--dot").select("svg"),
+    svgMapBasic = d3.select("#map--basic").select("svg"),
+    svgMapSorted = d3.select("#map--sorted").select("svg"),
+    svgMesh = d3.select("#mesh").select("svg"),
+    svgMeshState = d3.select("#mesh--state").select("svg");
+
+
+
+
+d3.json("{{url_for('static',filename='us.json')}}", function(error, us) {
+  if (error) return console.error(error);
+
+  svgMesh.append("path")
+      .datum(topojson.mesh(us))
+      .attr("class", "border border--mesh")
+      .attr("d", path);
+
+  svgMeshState.append("path")
+      .datum(topojson.mesh(us, us.objects.states))
+      .attr("class", "border border--mesh")
+      .attr("d", path);
+
+  svgMapBase.append("path")
+      .datum(topojson.feature(us, us.objects.nation))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svgMapBase.append("path")
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .attr("class", "border border--state")
+      .attr("d", path);
+
+  svgMapDot.append("g")
+      .attr("class", "bubble")
+    .selectAll("g")
+      .data(topojson.feature(us, us.objects.counties).features)
+    .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+      .attr("r", 1.5);
+
+  svgMapBasic.append("g")
+      .attr("class", "bubble")
+    .selectAll("g")
+      .data(topojson.feature(us, us.objects.counties).features)
+    .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+      .attr("r", function(d) { return radius(d.properties.population); });
+
+  svgMapSorted.append("g")
+      .attr("class", "bubble")
+    .selectAll("g")
+      .data(topojson.feature(us, us.objects.counties).features
+        .sort(function(a, b) { return b.properties.population - a.properties.population; }))
+    .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+      .attr("r", function(d) { return radius(d.properties.population); });
+
+  svgMap.append("g")
+      .attr("class", "bubble")
+    .selectAll("g")
+      .data(topojson.feature(us, us.objects.counties).features
+        .sort(function(a, b) { return b.properties.population - a.properties.population; }))
+    .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+      .attr("r", function(d) { return radius(d.properties.population); })
+    .append("title")
+      .text(function(d) {
+        return d.properties.name
+            + "\nPopulation " + formatNumber(d.properties.population);
+      });
+});
+
+})();
 </script>
 
 

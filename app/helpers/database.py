@@ -25,7 +25,7 @@ def query_db(con, dict):
     cur = con.cursor()
     cur.execute(
         """
-        SELECT b.beername,br.brewername,br.location, a.TFIDF, r.avgoverall,us.cityid,reg.region
+        SELECT b.beername,br.brewername,br.location, a.TFIDF, r.avgoverall,b.id,br.brewerid,us.cityid,reg.region
         FROM (
         SELECT cityid
         FROM uscities
@@ -58,6 +58,8 @@ def query_db(con, dict):
         index["location"] = beer[2].decode('latin-1','ignore')
         index["tfidf"] = json.dumps(beer[3])
         index["rating"] = json.dumps(beer[4])
+        index["beerid"] = beer[5]
+        index["brewerid"] = beer[6]
         data_array.append(index)
 
     cur.close()

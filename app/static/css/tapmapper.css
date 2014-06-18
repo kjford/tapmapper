@@ -43,4 +43,70 @@ body {
     border-top-right-radius : 0;
     clear : both;
     display : none;
-    font : bold x-large monospace;
+    font : bold medium monospace;
+}
+.land {
+  fill: #ddd;
+}
+
+.border {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.bubble {
+  fill: brown;
+  fill-opacity: .5;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.bubble :hover {
+  stroke: #000;
+}
+
+.legend circle {
+  fill: none;
+  stroke: #ccc;
+}
+
+.legend text {
+  fill: #777;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+#map .bubble circle {
+  fill: brown;
+  fill-opacity: .5;
+  stroke: white;
+  stroke-width: .5px;
+}
+
+#map--basic .bubble circle,
+#map--sorted .bubble circle {
+  stroke: white;
+}
+
+#map--sorted .bubble circle {
+  fill-opacity: .5;
+  stroke-width: .5px;
+}
+
+#map .bubble circle:hover {
+  stroke: black;
+  stroke-width: .5px;
+}
+
+#map,
+#map svg {
+  width: 960px;
+  height: 600px;
+}
+
+.map,
+.map svg {
+  width: 720px;
+  height: 450px;
+}
