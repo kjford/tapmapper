@@ -1,0 +1,46 @@
+body {
+    margin : 0;
+    padding : 0;
+    padding-top : 50px;
+}
+#map {
+    position : absolute;
+    height : calc(100% - 50px);
+    width : 100%;
+}
+#menu {
+    display : block;
+    float : right;
+    left : 0;
+    margin : 10px;
+    position : absolute;
+    text-align : center;
+    top : 50px;
+}
+#menu div, #menu #find input {
+    border : 1px solid gray;
+    border-radius : 3px;
+}
+#menu #find img {
+    height : 23px;
+    margin : 0 0 0 10px;
+    opacity : 1.0;
+    vertical-align : top;
+}
+#menu #find img:hover {
+    opacity : 0.8;
+}
+#menu #find img:active {
+    -webkit-filter : invert(100%);
+}
+#menu div {
+    background-color : #E8E8FF;
+    padding : 15px;
+}
+#menu #score {
+    border-top : none;
+    border-top-left-radius : 0;
+    border-top-right-radius : 0;
+    clear : both;
+    display : none;
+    font : bold x-large monospace;

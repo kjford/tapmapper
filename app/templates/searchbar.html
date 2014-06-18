@@ -1,12 +1,13 @@
 {% extends "layout/base.html" %}
 {% block content %}
   <div id='wrap' align='center'>
-  <h1>TapMapper</h1>
+  <h1>Find what the locals are drinking</h1>
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
   <form action="{{ url_for('showresults') }}" class="form-search" method=POST>
     <dl>
-      <dt>Where are you?
-      <dd><input id="city" type=text value="{{settings['city']}}" name=city class="input-medium search-query">
+      <dt>
+      <dd>
+      <input id="city" type=text placeholder="Enter City, State" value="{{settings['city']}}" name=city class="input-medium search-query">
       <p>
       <dd><button type=submit class="btn">What's on tap?</button>
       </p>

@@ -1,4 +1,4 @@
-from flask import render_template,url_for,request,redirect
+from flask import render_template,url_for,request,jsonify
 from app import app, host, port, user, passwd, db
 from app.helpers.database import con_db, query_db
 
@@ -6,35 +6,24 @@ import jinja2
 
 
 # ROUTING/VIEW FUNCTIONS
-@app.route('/', methods=['GET','POST'])
-def search():
-    if request.method == 'POST':
-        var_dict = {
-            "city": request.form["city"]
-        }
-        print 'here'
-    else:
-        var_dict={}
-    return render_template('searchbar.html', settings=var_dict)
+@app.route('/')
+def index():
+    # landing page
+    return render_template('map.html')
     
-@app.route('/results', methods=['POST'])
+@app.route('/search', methods=['POST'])
 def showresults():  
+    city = request.form['city'];
     con = con_db(host, port, user, passwd, db)
     var_dict = {
-        "city": request.form["city"]
+        "city": city
     }
     # Query the database
     data = query_db(con, var_dict)
     # Add data to dictionary
     var_dict["data"] = data
-        
-    return render_template('table.html', settings=var_dict)
+    return jsonify(var_dict)
 
-
-@app.route('/home')
-def home():
-    # Renders home.html.
-    return render_template('home.html')
 
 @app.route('/slides')
 def about():

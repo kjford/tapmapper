@@ -34,11 +34,11 @@ def makeSimMat(df):
     # go through data frame and add TFIDF to feature vectors
     for _,rowdata in df.iterrows():
         beer=rowdata['beerid']
-        region=rowdata['region']
+        region=rowdata['locbinid']
         score=rowdata['TFIDF']
-        beerind=B.index(beer)
-        regind=N.index(region)
-        featvec[beerind,regind]=score
+        beerind=np.where(B==beer)[0][0]
+        regind=np.where(N==region)[0][0]
+        featvec[regind,beerind]=score
     
     S = np.zeros((len(N),len(N)))
     # compute similarity matrix

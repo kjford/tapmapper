@@ -1,0 +1,70 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+
+    <div id='map'></div>
+
+    <div id='menu'>
+      <div id='find'>
+        <input type='search' id='city' placeholder='Enter City, State' class="form-control" />
+        <button type="submit" id="search" class="btn btn-default">go</button>
+      </div>
+      <div id='score' class='list-group'>
+      </div>
+    </div>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+
+<script type=text/javascript>
+    $(function () {
+        var output = $('div#score.list-group')
+        var button = $('button#search.btn.btn-default')
+
+        button.bind('click', function () {
+            output.empty()
+
+
+            $.post('/search', {
+                city: $('input#city.form-control').val()
+            })
+                    .done(function (get_results) {
+
+                        var heading = $('<div/>')
+                                .addClass('panel-heading')
+                                .appendTo(output)
+
+                        $('<h3/>')
+                                .addClass('panel-title')
+                                .text('Top Most Unique Beers')
+                                .appendTo(heading)
+
+                        var items = get_results['data']
+                        var list = document.createElement('score')
+                        $.each(items, function () {
+                              var a=$('<p/>')
+                                    .addClass('list-group-item')
+                                    .text(this['name'])
+                                    .appendTo(list)
+                        })
+                        output.append(list)
+                    })
+                    .fail(function () {
+                        $('<div/>')
+                                .addClass('alert alert-danger')
+                                .text('Invalid input!')
+                                .appendTo(output)
+                    });
+            $('#score').css('display', 'block');
+        });
+        
+    });
+</script>
+
+
+
+
+
+{% endblock %}
