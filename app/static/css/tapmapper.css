@@ -2,12 +2,9 @@ body {
     margin : 0;
     padding : 0;
     padding-top : 50px;
+    overflow: auto;
 }
-#map {
-    position : absolute;
-    height : calc(100% - 50px);
-    width : 100%;
-}
+
 #menu {
     display : block;
     float : right;
@@ -16,6 +13,7 @@ body {
     position : absolute;
     text-align : center;
     top : 50px;
+    max-width: 200px;
 }
 #menu div, #menu #find input {
     border : 1px solid gray;
@@ -34,7 +32,7 @@ body {
     -webkit-filter : invert(100%);
 }
 #menu div {
-    background-color : #E8E8FF;
+    background-color : #99CCFF;
     padding : 15px;
 }
 #menu #score {
@@ -103,6 +101,7 @@ body {
 #map svg {
   width: 960px;
   height: 600px;
+  margin: 10px 5px 5px 70px;
 }
 
 .map,

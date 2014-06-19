@@ -1,6 +1,7 @@
 from flask import render_template,url_for,request,jsonify
 from app import app, host, port, user, passwd, db
 from app.helpers.database import con_db, query_db
+from app.helpers.similaritymat import getSimdata
 
 import jinja2
 
@@ -22,6 +23,12 @@ def showresults():
     data = query_db(con, var_dict)
     # Add data to dictionary
     var_dict["data"] = data
+    # get similarity data
+    if data:
+        simdata= getSimdata(con,data[0]["regionid"])
+    else:
+        simdata=[]
+    var_dict["simdata"]=simdata
     return jsonify(var_dict)
 
 

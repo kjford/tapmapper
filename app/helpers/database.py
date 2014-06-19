@@ -22,46 +22,47 @@ def query_db(con, dict):
     search_city = dict["city"]
     
     # Query database
-    cur = con.cursor()
-    cur.execute(
-        """
-        SELECT b.beername,br.brewername,br.location, a.TFIDF, r.avgoverall,b.id,br.brewerid,us.cityid,reg.region
-        FROM (
-        SELECT cityid
-        FROM uscities
-        WHERE fullname LIKE '{0}'
-        ) AS us
-        JOIN (
-        SELECT DISTINCT p.locbinid AS region, p.cityid
-        FROM procbintweets AS p
-        ) AS reg
-        ON reg.cityid=us.cityid
-        JOIN tfidf AS a
-        ON reg.region=a.locbinid
-        JOIN beers AS b
-        ON a.beerid=b.id
-        JOIN brewers AS br
-        ON b.brewerid=br.brewerid
-        JOIN revstats AS r
-        ON b.id=r.id    
-        ORDER by a.TFIDF DESC
-        LIMIT 5
-        """.format(search_city)
-    )
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            """
+            SELECT b.beername,br.brewername,br.location, a.TFIDF, r.avgoverall,b.id,br.brewerid,reg.region
+            FROM (
+            SELECT cityid
+            FROM uscities
+            WHERE fullname LIKE '{0}'
+            ) AS us
+            JOIN (
+            SELECT DISTINCT p.locbinid AS region, p.cityid
+            FROM procbintweets AS p
+            ) AS reg
+            ON reg.cityid=us.cityid
+            JOIN tfidf AS a
+            ON reg.region=a.locbinid
+            JOIN beers AS b
+            ON a.beerid=b.id
+            JOIN brewers AS br
+            ON b.brewerid=br.brewerid
+            JOIN revstats AS r
+            ON b.id=r.id    
+            ORDER by a.TFIDF DESC
+            LIMIT 5
+            """.format(search_city)
+        )
 
-    data = cur.fetchall()
-    for beer in data:
-        index = {}
+        data = cur.fetchall()
+        for beer in data:
+            index = {}
 
-        index["name"] = beer[0].decode('latin-1','ignore')
-        index["brewer"] = beer[1].decode('latin-1','ignore')
-        index["location"] = beer[2].decode('latin-1','ignore')
-        index["tfidf"] = json.dumps(beer[3])
-        index["rating"] = json.dumps(beer[4])
-        index["beerid"] = beer[5]
-        index["brewerid"] = beer[6]
-        data_array.append(index)
+            index["name"] = beer[0].decode('latin-1','ignore')
+            index["brewer"] = beer[1].decode('latin-1','ignore')
+            index["location"] = beer[2].decode('latin-1','ignore')
+            index["tfidf"] = json.dumps(beer[3])
+            index["rating"] = json.dumps(beer[4])
+            index["beerid"] = beer[5]
+            index["brewerid"] = beer[6]
+            index["regionid"] = beer[7]
+            data_array.append(index)
 
-    cur.close()
-    con.close()
+        cur.close()
     return data_array
