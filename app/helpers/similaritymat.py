@@ -84,6 +84,26 @@ def getRegionExample(con):
     df=pd.io.sql.read_sql(sql,con)
     return df
 
+def outputRegionPoints(con):
+    # output in json like formate the region id's, names, and lat+lon
+    df=getRegionExample(con)
+    df=df.set_index('locbinid') #index by region
+    inds=list(df.index)
+    bc=df.beercount.tolist()
+    fn=df.fullname.tolist()
+    lats=df.lat.tolist()
+    lngs=df.lng.tolist()
+    output=[]
+    for i in xrange(len(df)):
+        output.append({'regionid':inds[i],\
+                       'beercount':bc[i],\
+                       'fullname':fn[i],\
+                       'lat':lats[i],\
+                       'lng':lngs[i],
+                       'similarity':bc[i]})
+    return output
+
+
 def getSimdata(con,regid):
     # get tf-idf similarity scores
     tfidf=readTFIDF(con)

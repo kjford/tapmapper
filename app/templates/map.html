@@ -29,6 +29,14 @@
 var items={} // generic json object that will hold output from query
 var mapdata={}
 $(function () {
+	
+	// load map of beer tweets by city
+	$.get('/beercount')
+	    .done(function (beercounts) {
+	        MakeMap(beercounts['data']);});
+	        
+	    
+	    
 	var output = $('div#score.list-group')
 	var button = $('button#search.btn.btn-primary')
 	$('input#city.form-control').keyup(function(event){

@@ -13,7 +13,7 @@ from authent import dbauth as authsql
 
 # clunky hack that needs work:
 # start processing mysql data base from id >= minid
-with open('rawtweetprocid.txt','r') as f:
+with open('rawtweetprocid.cfg','r') as f:
     minid=int(f.read())
 print 'Loading data'
 con=mdb.connect(**authsql)
@@ -138,7 +138,7 @@ for beerind,beerrow in beerdf.iterrows():
 minid=tweetdf['rawid'].max()
 
 # save out minid value for future use
-with open('rawtweetprocid.txt','w') as f:
+with open('rawtweetprocid.cfg','w') as f:
     minidstr=str(minid)
     f.write(minidstr)
 

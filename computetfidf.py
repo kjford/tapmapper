@@ -35,7 +35,7 @@ for bid,gr in df.groupby('beerid'):
         idfValue.append(1.0*len(gr))
 tfValue=np.array(tfValue)
 idfValue=np.array(idfValue)
-idfValue=np.log(1.0*N/idfValue)
+idfValue=np.log(1.0*N/(1.0+idfValue))
 
 tfidf=tfValue*idfValue
 

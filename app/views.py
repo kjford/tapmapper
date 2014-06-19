@@ -1,7 +1,7 @@
 from flask import render_template,url_for,request,jsonify
 from app import app, host, port, user, passwd, db
 from app.helpers.database import con_db, query_db
-from app.helpers.similaritymat import getSimdata
+from app.helpers.similaritymat import getSimdata,outputRegionPoints
 
 import jinja2
 
@@ -31,7 +31,13 @@ def showresults():
     var_dict["simdata"]=simdata
     return jsonify(var_dict)
 
-
+@app.route('/beercount',methods=['GET'])
+def showcountmap():
+    con = con_db(host, port, user, passwd, db)
+    output={}
+    output['data']=outputRegionPoints(con)
+    return jsonify(output)
+    
 @app.route('/slides')
 def about():
     # Renders slides.html.
