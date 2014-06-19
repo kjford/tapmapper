@@ -28,11 +28,12 @@ N = len(df['locbinid'].unique())
 idfValue=[]
 
 for bid,gr in df.groupby('beerid'):
+    nuniqueloc=len(gr['locbinid'].unique())
     for lid,gr2 in gr.groupby('locbinid'):
         tfBid.append(int(bid))
         tfLid.append(int(lid))
         tfValue.append(1.0*len(gr2))
-        idfValue.append(1.0*len(gr))
+        idfValue.append(1.0*nuniqueloc)
 tfValue=np.array(tfValue)
 idfValue=np.array(idfValue)
 idfValue=1.0+np.log(1.0*N/(idfValue))
