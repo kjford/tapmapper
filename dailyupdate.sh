@@ -4,5 +4,5 @@ python procrawtweets.py
 echo 'Cleaning and binning raw tweets'
 python cleanandbinproctweets.py
 echo 'Recomputing TFIDF table'
-python comuputetfidf.py
+python computetfidf.py
 echo 'Done'
