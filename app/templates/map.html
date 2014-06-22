@@ -2,7 +2,7 @@
 {% block content %}
 <div class="page-header" align="center" id="titlebanner">
   <h1>TapMapper <small>Find what the locals are drinking</small></h1>
-  <h3 id="cityheader" align="center"></h3>
+  <h3 id="cityheader" align="center">Beer Tweet Volume</h3>
 </div>
     <div class='map' id='map'></div>
 
@@ -74,10 +74,10 @@ $(function () {
 								.addClass('list-group-item')
 								.attr('href', 'http://beeradvocate.com/beer/profile/'+this['brewerid']+'/'+this['beerid'])
 								.html(this['name']+'<br/><small>'+this['brewer']+', '+this['location']+'</small>')
-								.appendTo(list)
+								.appendTo(list);
 						
-					})
-					output.append(list)
+					});
+					output.append(list);
 					MakeMap(mapdata);
 				})
 				.fail(function () {
@@ -112,7 +112,7 @@ var maxval = d3.max(data, function(d){return d['similarity'];});
 
 var radius = d3.scale.sqrt()
     .domain([minval, maxval])
-    .range([0, 50]);
+    .range([5, 100]);
 
 
 
@@ -166,9 +166,16 @@ d3.json("{{url_for('static',filename='us_raw.json')}}", function(error, us) {
             return projection([d['lng'],d['lat']])[1];
     })   
     .attr("r", function(d){
-            return radius(d['similarity']);
+            var cirsz=radius(d['similarity']);
+            if (d['similarity']>=0.99)
+                cirsz=radius(d['similarity'])/2
+            return cirsz;
     })
-    .style("fill", "yellow")
+    .style("fill", function(d){
+            var cfill = 'blue';
+            if (d['similarity']>=0.99)
+                cfill = "teal";
+            return cfill;})
     .style("opacity", 0.75)
     .append("svg:title")
     .text( function(d){

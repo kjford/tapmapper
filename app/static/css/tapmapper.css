@@ -32,7 +32,7 @@ body {
     -webkit-filter : invert(100%);
 }
 #menu div {
-    background-color : #99CCFF;
+    background-color : #008080;
     padding : 15px;
 }
 #menu #score {
@@ -101,7 +101,7 @@ body {
 #map svg {
   width: 960px;
   height: 600px;
-  margin: 10px 5px 5px 70px;
+  margin: 0px 5px 5px 70px;
 }
 
 .map,
