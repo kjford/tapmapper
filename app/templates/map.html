@@ -4,17 +4,21 @@
   <h1>TapMapper <small>Find what the locals are drinking</small></h1>
   <h3 id="cityheader" align="center">Beer Tweet Volume</h3>
 </div>
-    <div class='map' id='map'></div>
-
-    <div id='menu'>
-      <div id='find'>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-2"> </div>
+    <div class="col-sm-10">
+        <div class='map' id='map' align='center'></div>
+    </div>
+  </div>
+</div>
+<div id='menu'>
+    <div id='find'>
         <input type='search' id='city' placeholder='Enter City, State' class="form-control" />
         <button type="submit" id="search" class="btn btn-primary">Map</button>
-      </div>
-      <div id='score' class='list-group'>
-      </div>
-    </div>
-
+    </div>      
+    <div id='score' class='list-group'></div>
+</div>
 
 
 <!-- Search bar -->
@@ -34,9 +38,7 @@ $(function () {
 	$.get('/beercount')
 	    .done(function (beercounts) {
 	        MakeMap(beercounts['data']);});
-	        
-	    
-	    
+	        	    
 	var output = $('div#score.list-group')
 	var button = $('button#search.btn.btn-primary')
 	$('input#city.form-control').keyup(function(event){
@@ -176,7 +178,7 @@ d3.json("{{url_for('static',filename='us_raw.json')}}", function(error, us) {
             if (d['similarity']>=0.99)
                 cfill = "teal";
             return cfill;})
-    .style("opacity", 0.75)
+    .style("opacity", 1.0)
     .append("svg:title")
     .text( function(d){
             return d['fullname'];

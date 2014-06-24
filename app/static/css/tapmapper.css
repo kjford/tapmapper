@@ -1,7 +1,7 @@
 body {
     margin : 0;
     padding : 0;
-    padding-top : 50px;
+    padding-top : 10px;
     overflow: auto;
 }
 
@@ -33,7 +33,7 @@ body {
 }
 #menu div {
     background-color : #008080;
-    padding : 15px;
+    padding : 5px;
 }
 #menu #score {
     border-top : none;
@@ -77,7 +77,7 @@ body {
 }
 #map .bubble circle {
   fill: brown;
-  fill-opacity: .5;
+  fill-opacity: .75;
   stroke: white;
   stroke-width: .5px;
 }
@@ -88,7 +88,7 @@ body {
 }
 
 #map--sorted .bubble circle {
-  fill-opacity: .5;
+  fill-opacity: .75;
   stroke-width: .5px;
 }
 
@@ -101,7 +101,7 @@ body {
 #map svg {
   width: 960px;
   height: 600px;
-  margin: 0px 5px 5px 70px;
+  margin: 5px 5px 5px 5px;
 }
 
 .map,

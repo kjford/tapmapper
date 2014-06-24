@@ -8,11 +8,12 @@ con=mdb.connect(**authsql)
 
 
 sql='''
-select tweettime, count(distinct rawid) as cnt
+select dayname(convert_tz(tweettime,'GMT','US/Pacific')) as dayofweek, count(distinct rawid) as cnt
 from procbintweets
 join processedtweets
 on procbintweets.proctweetid=processedtweets.proctwid
-group by day(tweettime)
+where date(convert_tz(tweettime,'GMT','US/Pacific'))>=date_sub(current_date(),INTERVAL 8 DAY)
+group by dayofweek
 '''
 
 df=pd.io.sql.read_sql(sql,con)
