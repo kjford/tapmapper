@@ -105,6 +105,35 @@ def regionalscore(df):
     return regscore
 
 
+
+def beercountbycity(df):
+    # compute distance/tf-idf
+    tfBid=[] #beers
+    tfLid=[] #locations
+    tfValue=[] # term frequency value
+    # get in number of regions
+    N = len(df['locbinid'].unique())
+    distValue = []
+    
+    for bid,gr in df.groupby('beerid'):
+        nuniqueloc=len(gr['locbinid'].unique())
+        blat=gr['BR_Lat'].unique()[0]
+        blng=gr['BR_Lng'].unique()[0] #only one
+        for lid,gr2 in gr.groupby('locbinid'):
+            tfBid.append(int(bid))
+            tfLid.append(int(lid))
+            tfValue.append(1.0*len(gr2)) # number of beer mentions in city
+            rlat=blat=gr2['R_Lat'].unique()[0]
+            rlng=gr2['R_Lng'].unique()[0]
+            distValue.append(distcalc(blat,blng,rlat,rlng))
+    tfValue=np.array(tfValue) # this is not normalized to number of tweets in region
+    
+    regscore = [np.array(distValue),tfValue]
+    return regscore
+
+
+
+
 def randomizeDF(df):
     # permute the data frame to randomize beer-region interactions
     # break apart into beer and regions
@@ -136,21 +165,47 @@ def TFIDFvsbinDist(tfidf,distarr,binsize=50,maxbin=2000):
         counts[i]=len(tfidf[dbins==(i+1)])
     return [counts,xbins]
 
+def BeerCntvsbinDist(cntarr,distarr,binsize=50,maxbin=2000):
+    # bin cntarr-distarr pairs into distance bins and take sum in bin
+    xbins=np.arange(0,maxbin,binsize)
+    # only care about ones that have real positive distances
+    distarr=distarr[distarr>=0]
+    cntarr=cntarr[distarr>=0]
+    # digitize the distances
+    dbins=np.digitize(distarr,xbins)
+    counts=np.zeros(len(xbins))
+    for i in xrange(len(xbins)):
+        #counts of tweets:
+        counts[i]=np.sum(cntarr[dbins==(i+1)])
+    return [counts,xbins]
+
+
 
 if __name__=='__main__':
     # run permutation analysis
     n=100
     con=condb()
     df=readTFIDF(con)
-    blscore = regionalscore(df)
+    blscore = beercountbycity(df)
     perscores=[]
     print 'Running permutation analysis'
     for i in xrange(n):
         print 'permutation %i'%i
         newdf=randomizeDF(df)
-        perscores.append(regionalscore(newdf))
+        perscores.append(beercountbycity(newdf))
     blarray=np.array(blscore)
     permarray=np.array(perscores)
     # bin by distance
-    binneddata=TFIDFvsbinDist(blarray[1],blarray[0])
+    binneddata=BeerCntvsbinDist(blarray[1],blarray[0])
+    dataavg=binneddata[0]
+    xbins=binneddata[1]
+    count=0
+    permtfidfvd=np.zeros((n,len(binneddata[1])))
+    for p in permarray:
+        permtfidfvd[count,:]=np.array(BeerCntvsbinDist(p[1],p[0]))[0]
+        count+=1
+    permavg=permtfidfvd.mean(axis=0)
+    
+    
+    
     
