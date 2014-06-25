@@ -14,31 +14,50 @@
 </div>
 <div id='menu'>
     <div id='find'>
-        <input type='search' id='city' placeholder='Enter City, State' class="form-control" />
+        <input type='search' id='city' placeholder='Enter City, State' class="form-control"/>
         <button type="submit" id="search" class="btn btn-primary">Map</button>
     </div>      
     <div id='score' class='list-group'></div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 
 <!-- Search bar -->
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="{{url_for('static',filename='js/typeahead.js')}}"></script>
 
 <script>
-// variables global to search bar menu and map
-var items={} // generic json object that will hold output from query
-var mapdata={}
-$(function () {
-	
-	// load map of beer tweets by city
-	$.get('/beercount')
+
+// load cities into search bar
+
+$.get('/poplist', function(citylist){
+        console.log(citylist)
+        $('#city').typeahead({
+	        local: citylist['data'],
+	        keyValue: "name",
+	        limit: 5
+	        });
+	    }, "json");
+
+/**
+$('#city').typeahead({
+	        local: ["cat","did"],
+	        keyValue: "name",
+	        limit: 5
+	        });
+**/
+
+
+$.get('/beercount')
 	    .done(function (beercounts) {
 	        MakeMap(beercounts['data']);});
-	        	    
+
+$(function () {
+	       	    
 	var output = $('div#score.list-group')
 	var button = $('button#search.btn.btn-primary')
 	$('input#city.form-control').keyup(function(event){
@@ -72,10 +91,18 @@ $(function () {
 					        .appendTo(citytitle)
 					var list = document.createElement('score')
 					$.each(items, function () {
+						// if I don't have the brewer name, just return beer name
+						var brname=this['name']
+						if (this['brewer'].length > 2)
+						    {brname = this['name']+'<br/><small>'+this['brewer']+', '+this['location']+'</small>'}
+						// make the popover element
+						var popboxdata = '<img src="http://cdn.beeradvocate.com/im/beers/'+this['brewerid']+'/'+this['beerid']+'.jpg"/>BeerAdvocate rating: '+ this['rating']
+						var popboxcode = 'data-container="body" data-toggle="popover" data-placement="right" trigger="hover" data-content="test"'
+						                  
 						var a = $('<a/>')
 								.addClass('list-group-item')
 								.attr('href', 'http://beeradvocate.com/beer/profile/'+this['brewerid']+'/'+this['beerid'])
-								.html(this['name']+'<br/><small>'+this['brewer']+', '+this['location']+'</small>')
+								.html(brname)
 								.appendTo(list);
 						
 					});

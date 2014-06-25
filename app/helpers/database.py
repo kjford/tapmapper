@@ -66,3 +66,23 @@ def query_db(con, dict):
 
         cur.close()
     return data_array
+
+def getcitylist(con):
+    # git current list of all cities that have tweets to populate search bar
+    with con:
+        cur = con.cursor()
+        cur.execute('''
+        SELECT distinct(l.fullname)
+        FROM processedtweets as p
+        JOIN uscities as l
+        ON l.cityid=p.cityid
+        WHERE p.cityid IS NOT NULL
+        ''')
+        data=cur.fetchall()
+        dataarray=[]
+        for city in data:
+            #dataarray.append({"name":city[0].decode('latin-1','ignore')})
+            dataarray.append(city[0].decode('latin-1','ignore'))
+        cur.close()
+    return dataarray
+        

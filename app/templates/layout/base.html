@@ -25,7 +25,7 @@
     <link href="{{ url_for('static', filename='vendor/Genericons/genericons.css') }}" rel="stylesheet">
 
     <!-- Your custom styles -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel='stylesheet' href="{{url_for('static',filename='css/typeahead.css')}}">
     <link href="{{ url_for('static', filename='css/tapmapper.css') }}" rel='stylesheet' />
 
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -70,11 +70,9 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ url_for('static', filename='vendor/jquery/dist/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 
     <!-- Page specific script files -->
+    
     {% block scripts %}{% endblock %}
 
     <script type="text/javascript">

@@ -1,6 +1,6 @@
 from flask import render_template,url_for,request,jsonify
 from app import app, host, port, user, passwd, db
-from app.helpers.database import con_db, query_db
+from app.helpers.database import con_db, query_db, getcitylist
 from app.helpers.similaritymat import getSimdata,outputRegionPoints
 
 import jinja2
@@ -37,7 +37,14 @@ def showcountmap():
     output={}
     output['data']=outputRegionPoints(con)
     return jsonify(output)
-    
+
+@app.route('/poplist',methods=['GET'])
+def poplist():
+    con = con_db(host, port, user, passwd, db)
+    output={}
+    output['data']=getcitylist(con)
+    return jsonify(output)
+      
 @app.route('/slides')
 def about():
     # Renders slides.html.
