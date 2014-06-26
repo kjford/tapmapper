@@ -34,22 +34,14 @@
 
 // load cities into search bar
 
-$.get('/poplist', function(citylist){
+$.get('/poplist').done(function(citylist){
         console.log(citylist)
         $('#city').typeahead({
 	        local: citylist['data'],
 	        keyValue: "name",
 	        limit: 5
 	        });
-	    }, "json");
-
-/**
-$('#city').typeahead({
-	        local: ["cat","did"],
-	        keyValue: "name",
-	        limit: 5
-	        });
-**/
+	    });
 
 
 $.get('/beercount')
