@@ -1,0 +1,100 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+
+<div class="container marketing" style="padding-top: 50px;padding-bottom: 50px">
+  
+  <div class="row">
+    <div class="col-md-4 text-center">
+      <img class="img" src="{{ url_for('static', filename='images/favicon.ico') }}" height=140 width=140>
+      <h2>How TapMapper Works</h2>
+      <p>Using Twitter data to find what beers are popular and where.</p>
+      <p><a class="btn btn-default" href="#details">View Details »</a></p>
+    </div>
+    <div class="col-md-4 text-center">
+      <img class="img" src="{{ url_for('static', filename='images/chart.png') }}" height=140 width=140>
+      <h2>Data Analytics</h2>
+      <p>Check out local and national trends.</p>
+      <p><a class="btn btn-default" href="#trends">View Trends »</a></p>
+    </div>
+    <div class="col-md-4 text-center">
+      <img class="img" src="{{ url_for('static', filename='images/snob.png') }}" height=140 width=140>
+      <h2>Beer Snob Ranking</h2>
+      <p>What cities have the snobbiest taste in beer and where is low-brow beer king?</p>
+      <p><a class="btn btn-default" href="#fun">View Snob Rankings »</a></p>
+    </div>
+  </div><!-- /.row -->
+  
+  
+  <hr class="featurette-divider" id="details">
+
+  <div class="featurette">
+    <img class="featurette-image img pull-left" src="{{url_for('static', filename='images/beershed.png')}}" height=300 width=400>
+    <h2 class="featurette-heading">About TapMapper <span class="text-muted">Twitter + Beer</span></h2>
+    <p class="lead">TapMapper uses a database of Twitter tweets filtered on beer drinking related terms
+    to find out what Twitter users in cities across the US are drinking.  Incoming tweets 
+    with geographical information are catalogued and mined for beer names using information 
+    from <a href="http://www.BeerAdvocate.com">BeerAdvocate</a>.  A TF-IDF (term frequency-
+    inverse document frequency) score is assigned to each beer-city combination to identify 
+    beers that are over-represented in each city.  To find cities that have similar preferences 
+    in beer, the <a href="http://en.wikipedia.org/wiki/Cosine_similarity">cosine-similarity
+    </a> is computed between cities.</p>
+  </div>
+
+  <hr class="featurette-divider" id="trends">
+  <!-- generated tables -->
+  <div class="featurette">
+  <h2 class="featurette-heading">Analytics <span class="text-muted">{{settings['rawcount']}} tweets and growing</span></h2>
+    <p class="lead"></p>
+    <table class="table table-bordered table-condensed table-striped">
+        <thead>
+              <th>Biggest Drinkers</th>
+              <th>Most Tweeted Beers</th>
+            </thead>
+            <tbody>
+              {% for line in settings['data'] %}
+              <tr>
+                <td>{{line.topcities}}</td>
+                <td>{{line.topbeers}}</td>
+              </tr>
+              {% endfor %}
+        </tbody>
+    </table>
+  </div>
+
+  <hr class="featurette-divider" id="fun">
+
+  <div class="featurette">
+    <img class="featurette-image img pull-right" src="{{ url_for('static', filename='images/glasscan.png') }}" height=150 width=200>
+    <h2 class="featurette-heading">Beer Snob Ranking <span class="text-muted">Glass or can?</span></h2>
+    <p class="lead">For all beers tweeted about in a city, the snob index is computed as the uniqueness score * average rating from <a href="http://www.BeerAdvocate.com">BeerAdvocate</a>.
+    </p>
+    <table class="table table-bordered table-condensed table-striped">
+        <thead>
+              <th>Most Beer Snobby Cities</th>
+              <th>Least Pretentious Cities</th>
+            </thead>
+            <tbody>
+              {% for line in settings['data'] %}
+              <tr>
+                <td>{{line.snobs}}</td>
+                <td>{{line.lowbrows}}</td>
+              </tr>
+              {% endfor %}
+        </tbody>
+    </table>
+    
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Search bar -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+{% endblock %}
+
+{% block footer %}
+  {% include "include/footer.html" %}
+{% endblock %}
