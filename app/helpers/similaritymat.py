@@ -36,9 +36,11 @@ def makeSimMat(df):
     S = np.zeros((len(N),len(N)))
     # compute similarity matrix
     for r in xrange(len(N)):
+        rvec=featvec[r,:]/featvec[r,:].sum()
         for r2 in xrange(0,r):
-            S[r,r2]=cosinesim(featvec[r,:],featvec[r2,:])
-            S[r2,r]=cosinesim(featvec[r,:],featvec[r2,:])
+            s=cosinesim(rvec,featvec[r2,:]/(featvec[r2,:].sum()))
+            S[r,r2]=s
+            S[r2,r]=s
             # waste of space to store twice, but this won't ever be that big
     # return along with unique indices of regions
     return S,N

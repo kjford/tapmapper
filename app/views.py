@@ -1,8 +1,8 @@
 from flask import render_template,url_for,request,jsonify
 from app import app, host, port, user, passwd, db
-from app.helpers.database import con_db, query_db, getcitylist
+from app.helpers.database import con_db, query_db, getcitylist, getstatspageinfo
 from app.helpers.similaritymat import getSimdata,outputRegionPoints
-
+import simplejson
 import jinja2
 
 
@@ -54,6 +54,20 @@ def about():
 def contact():
     # Renders author.html.
     return render_template('author.html')
+
+@app.route('/stats', methods=['GET'])
+def stats():
+    con = con_db(host, port, user, passwd, db)
+    output={}
+    jfile='./app/static/snob.json'
+    fobj=open(jfile)
+    jobj=simplejson.load(fobj)
+    fobj.close()
+    data=getstatspageinfo(con,jobj)
+    output['rawcount']=data['rawcount']
+    output['data']=data['data']
+    return render_template('stats.html',settings=output)
+
 
 @app.errorhandler(404)
 def page_not_found(error):
