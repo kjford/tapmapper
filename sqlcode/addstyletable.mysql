@@ -1,0 +1,27 @@
+# create style tables from RateBeer database
+
+# create style index table
+
+DROP TABLE IF EXISTS style;
+CREATE TABLE IF NOT EXISTS style (
+    styleid INT AUTO_INCREMENT PRIMARY KEY,
+    stylename VARCHAR(200)
+    );
+
+INSERT INTO style
+    (stylename)
+    SELECT DISTINCT beer_style FROM RateBeer;
+
+
+# add column of style id into beers table
+
+ALTER TABLE beers ADD styleid INT NULL;
+
+# insert values into styleid
+
+UPDATE beers AS b
+JOIN
+  (SELECT DISTINCT beer_beerid, beer_style FROM RateBeer) AS a
+ON b.id = a.beer_beerid
+LEFT JOIN style ON a.beer_style=style.stylename
+SET b.styleid = style.styleid
