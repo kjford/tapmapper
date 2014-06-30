@@ -9,4 +9,6 @@ node_modules
 savefiles/
 slidedecks/
 backups/
+*.pid
+*.conf
 *.json
