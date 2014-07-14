@@ -21,7 +21,7 @@ def dayofweek(condb=con):
         from procbintweets
         join processedtweets
         on procbintweets.proctweetid=processedtweets.proctwid
-        where date(convert_tz(tweettime,'GMT','US/Pacific'))>=date_sub(convert_tz(current_date(),'GMT','US/Pacific'),INTERVAL 8 DAY)
+        where date(convert_tz(tweettime,'GMT','US/Pacific'))>=date_sub(convert_tz(current_date(),'GMT','US/Pacific'),INTERVAL 28 DAY)
         group by dayofweek
         '''
     df=pd.io.sql.read_sql(sql,condb)

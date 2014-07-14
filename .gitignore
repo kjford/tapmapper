@@ -12,3 +12,4 @@ backups/
 *.pid
 *.conf
 *.json
+*.ipynb
