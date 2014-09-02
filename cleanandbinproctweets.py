@@ -12,8 +12,11 @@ import numpy as np
 from authent import dbauth as authsql
 from blacklist import blacklist
 
-# minimum number of tweets in a city
+# minimum number of tweets in a city - old
 mintweets=10 # this should probably change as I get more data
+# use this instead:
+# compute max number of cities to use, using ones with most tweets
+maxcities = 200
 
 con=mdb.connect(**authsql)
 with con:
@@ -99,6 +102,12 @@ for c1 in xrange(len(cid)):
         dact= distcalc(latcity[c1],lngcity[c1],latcity[c2],lngcity[c2])
         simarray[c1,c2]=dact 
         simarray[c2,c1]=dact
+
+# determine mintweets from the number of tweets array
+if len(ntweetsarr)>maxcities:
+    mintweets = ntweetsarr[maxcities]
+else:
+    mintweets=10
 
 # if a city has < mintweets, add to closest city above threshold
 for i in xrange(len(cid)):
