@@ -65,10 +65,11 @@ $(function () {
 		})
 				.done(function (get_results) {
 
+					$('#score').empty()
 					var heading = $('<div/>')
 							.addClass('panel-heading')
 							.appendTo(output)
-
+					
 					$('<h3/>')
 							.addClass('panel-title')
 							.text('Top Most Unique Beers')
@@ -202,7 +203,7 @@ d3.json("{{url_for('static',filename='us_raw.json')}}", function(error, us) {
     .text( function(d){
             return d['fullname'];
     });
-  
+ 
 });
 
   
