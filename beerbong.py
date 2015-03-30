@@ -27,4 +27,14 @@ with con:
 # start a twitter stream
 keywords=['drinking','ale','beer','tap','ipa','stout','imperial'] # from top 50 minus stopwords
 
-twittertools.TwitStream(keywords,con)
+stillgoing = True
+counter = 0
+while stillgoing:
+    try:
+        twittertools.TwitStream(keywords,con)
+    except:
+        print 'Connection fail. Sleeping.'
+        time.sleep(10)
+        counter += 1
+        if counter > 10:
+            stillgoing = False

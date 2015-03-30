@@ -23,6 +23,7 @@ with con:
 tfBid=[] #beers
 tfLid=[] #locations
 tfValue=[] # term frequency value
+tfNorm=[] # hold tweet frequency for region
 # get in number of regions
 N = len(df['locbinid'].unique())
 idfValue=[]
@@ -33,20 +34,25 @@ for bid,gr in df.groupby('beerid'):
         tfBid.append(int(bid))
         tfLid.append(int(lid))
         tfValue.append(1.0*len(gr2))
+        # get total for region
+        tfNorm.append(np.sum(df['locbinid']==lid))
         idfValue.append(1.0*nuniqueloc)
-tfValue=(1.0+np.log(np.array(tfValue)))
+tfLog=(1.0+np.log(np.array(tfValue)))
+tfNorm=np.array(tfValue)/(1.0*np.array(tfNorm))
 idfValue=np.array(idfValue)
 idfValue=1.0+np.log(1.0*N/(idfValue))
 
-tfidf=tfValue*idfValue
+tfidf=tfLog*idfValue # change this to reflect normalization scheme
 
 # add back to database in tfidf table
 # cast the numpy arrays back to lists of floats
 tfValue = [float(x) for x in tfValue]
 idfValue = [float(x) for x in idfValue]
 tfidf = [float(x) for x in tfidf]
+tfNorm = [float(x) for x in tfNorm]
+tfLog = [float(x) for x in tfLog]
 
-vals=zip(tfBid,tfLid,tfValue,idfValue,tfidf)
+vals=zip(tfBid,tfLid,tfValue,idfValue,tfidf,tfNorm,tfLog)
 
 with con:
     cur=con.cursor()
@@ -59,14 +65,16 @@ with con:
         locbinid INT,
         TF DOUBLE,
         IDF DOUBLE,
-        TFIDF DOUBLE
+        TFIDF DOUBLE,
+        TFNORM DOUBLE,
+        TFLOG DOUBLE
         )
         """)
     # add to table
     insql='''
     INSERT INTO tfidf
-    (beerid,locbinid,TF,IDF,TFIDF)
+    (beerid,locbinid,TF,IDF,TFIDF,TFNORM,TFLOG)
     VALUES(
-    %s,%s,%s,%s,%s)
+    %s,%s,%s,%s,%s,%s,%s)
     '''
     cur.executemany(insql,vals)
