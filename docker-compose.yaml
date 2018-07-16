@@ -1,0 +1,21 @@
+version: "2"
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=demo
+
+  app:
+    build: .
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+    links:
+      - db
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_SETTINGS=/code/app/settings/docker.cfg
