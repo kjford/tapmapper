@@ -15,7 +15,7 @@ def get_aws_parameter(param_name, region='us-west-2'):
     # Get the requested parameter
     response = ssm.get_parameter(Name=param_name, WithDecryption=True)
 
-    return response['Parameters']['Value']
+    return response['Parameter']['Value']
 
 
 ENV = os.environ.get('FLASK_ENV', 'production')
