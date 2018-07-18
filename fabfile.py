@@ -9,7 +9,8 @@ code_path = '/home/ubuntu/tapmapper/tapmapper'
 
 def pull():
     with cd(code_path):
-        run('git pull')
+        run('git fetch')
+        run('git reset --hard origin/master')
 
 
 def install():

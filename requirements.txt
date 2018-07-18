@@ -17,4 +17,3 @@ simplejson
 tweepy
 pandas
 
-fabric<2.0.0
