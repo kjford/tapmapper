@@ -66,7 +66,7 @@ def contact():
 def stats():
     con = con_db(host, port, user, passwd, db)
     output={}
-    jfile='./app/static/snob.json'
+    jfile='./tapmapper/static/snob.json'
     fobj=open(jfile)
     jobj=simplejson.load(fobj)
     fobj.close()

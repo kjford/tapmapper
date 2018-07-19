@@ -15,8 +15,8 @@ def pull():
 
 def install():
     with cd(code_path):
-        run('pip install -r requirements.txt')
-        run('pip install -e .')
+        sudo('pip install -r requirements.txt')
+        sudo('pip install -e .')
 
 
 def serve():
