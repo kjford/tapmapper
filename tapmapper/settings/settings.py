@@ -31,10 +31,9 @@ if ENV == 'production':
 
 elif ENV == 'development':
     DEBUG = True
-    DATABASE_HOST = "db"
-    DATABASE_PORT = 3306
-    DATABASE_USER = "root"
-    DATABASE_PASSWORD = "demo"
+    DATABASE_HOST = os.environ.get('DATABASE_HOST', 'db')
+    DATABASE_USER = os.environ.get('DATABASE_USER', 'root')
+    DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD', 'demo')
 
 else:
     raise ValueError("ENV must be production or development")

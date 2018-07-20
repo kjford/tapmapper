@@ -155,5 +155,18 @@ with con:
     cur=con.cursor()
     cur.executemany(addtosql,vals)
 
+
+# create a lookup table
+with con:
+    cur = con.cursor()
+    cur.execute("DROP TABLE IF EXISTS city_to_region;")
+    cur.execute("""CREATE TABLE city_to_region (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                city_id INT,
+                locbin_id INT);""")
+    cur.execute("""INSERT INTO city_to_region (city_id, locbin_id)
+                SELECT DISTINCT cityid, locbinid
+                FROM procbintweets;""")
+
 print 'Done'
     
