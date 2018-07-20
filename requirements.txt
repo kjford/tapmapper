@@ -11,6 +11,7 @@ Werkzeug==0.9.4
 gunicorn>19.5.0
 itsdangerous==0.23
 wsgiref==0.1.2
+SQLAlchemy==1.2.10
 
 # workers
 simplejson
