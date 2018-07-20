@@ -1,9 +1,6 @@
 from sqlalchemy import Integer, BigInteger, Column, DateTime, Float, String, Text
 from sqlalchemy.dialects.mysql.types import TINYINT
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-metadata = Base.metadata
+from tapmapper.database import Base
 
 
 class RateBeer(Base):
