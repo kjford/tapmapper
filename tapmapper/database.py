@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from tapmapper import app
-
+from contextlib import contextmanager
 
 Base = declarative_base()
 
@@ -17,12 +17,21 @@ def db_url():
 
 
 engine = create_engine(db_url())
+Session = sessionmaker(bind=engine)
 
 
-def get_session():
-    yield scoped_session(sessionmaker(autocommit=False,
-                                      autoflush=False,
-                                      bind=engine))
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 def init_db():

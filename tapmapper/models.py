@@ -99,7 +99,7 @@ class Revstat(Base):
 
     id = Column(Integer, primary_key=True)
     nreviews = Column(Integer)
-    avgoverall = Column(Float(asdecimal=True))
+    avgoverall = Column(Float)
 
 
 class Style(Base):
@@ -117,7 +117,7 @@ class Tfidf(Base):
     locbinid = Column(Integer)
     TF = Column(Float(asdecimal=True))
     IDF = Column(Float(asdecimal=True))
-    TFIDF = Column(Float(asdecimal=True))
+    TFIDF = Column(Float)
 
 
 class Uscity(Base):
@@ -129,6 +129,13 @@ class Uscity(Base):
     fullname = Column(String(152))
     lat = Column(Float(asdecimal=True))
     lng = Column(Float(asdecimal=True))
+
+
+class CityRegion(Base):
+    __tablename__ = 'city_to_region'
+    id = Column(Integer, primary_key=True)
+    city_id = Column(Integer)
+    locbin_id = Column(Integer)
 
 
 class Zips(Base):

@@ -1,26 +1,38 @@
-'''
+"""
 Compute cosine similarity between regions from TFIDF scores across beers
-'''
+"""
+from tapmapper.database import session_scope, engine
+from tapmapper import models as m
 import pandas as pd
 import numpy as np
 
-def readTFIDF(con):
+
+def read_tfidf():
     # import data from database
-    sql='''
-    SELECT beerid,locbinid,TFIDF
-    FROM tfidf
-    '''
-    df=pd.io.sql.read_sql(sql,con)
+    # to do: this should really be stashed
+    with session_scope() as s:
+        q = s.query(m.Tfidf)
+        data = [{'beerid': x.beerid,
+                 'locbinid': x.locbinid,
+                 'TFIDF': x.TFIDF} for x in q]
+
+    df = pd.DataFrame(data)
     return df
 
-def cosinesim(v1,v2):
+
+def cosinesim(v1, v2):
     # cosine similarity between 2 vectors
     cs=v1.dot(v2.T) / (np.sqrt(v1.dot(v1.T)) * np.sqrt(v2.dot(v2.T)))
     return cs
-    
-def makeSimMat(df):
-    # make similarity matrix using cosine similarity between pairs of TFIDF scores
-    # first make N (regions) by B (unique beerids) set of features from TFIDF scores
+
+
+def make_sim_mat(df):
+    """
+    make similarity matrix using cosine similarity between
+    pairs of TFIDF scores
+    first make N (regions) by B (unique beerids)
+    set of features from TFIDF scores
+    """
     B=df['beerid'].unique()
     N=df['locbinid'].unique()
     featvec=np.zeros((len(N),len(B)))
@@ -45,32 +57,35 @@ def makeSimMat(df):
     # return along with unique indices of regions
     return S,N
 
-def makeSimVec(df,regid):
+
+def make_sim_vec(df, regid):
     # rather than make the entire similarity matrix, just get similarity vector for
     # region of interest
-    B=df['beerid'].unique()
-    N=df['locbinid'].unique()
-    featvec=np.zeros((len(N),len(B)))
+    B = df['beerid'].unique()
+    N = df['locbinid'].unique()
+    featvec = np.zeros((len(N),len(B)))
     # go through data frame and add TFIDF to feature vectors
-    for _,rowdata in df.iterrows():
-        beer=rowdata['beerid']
-        region=rowdata['locbinid']
-        score=rowdata['TFIDF']
-        beerind=np.where(B==beer)[0][0]
-        regind=np.where(N==region)[0][0]
-        featvec[regind,beerind]=score
+    for _, rowdata in df.iterrows():
+        beer = rowdata['beerid']
+        region = rowdata['locbinid']
+        score = rowdata['TFIDF']
+        beerind = np.where(B == beer)[0][0]
+        regind = np.where(N == region)[0][0]
+        featvec[regind, beerind] = score
     
     S = np.zeros((len(N)))
-    roi=np.where(N==regid)[0][0]
+    roi = np.where(N == regid)[0][0]
     # compute similarity scores
-    roivec=featvec[roi,:]/featvec[roi,:].sum()
+    roivec = featvec[roi, :]/featvec[roi, :].sum()
     for r in xrange(len(N)):
-        S[r]=cosinesim(featvec[r,:]/featvec[r,:].sum(),roivec)
-    return S,N
+        S[r] = cosinesim(featvec[r, :] / featvec[r,:].sum(), roivec)
+    return S, N
 
-def getRegionExample(con):
+
+def get_region_example():
     # look up in database the city with most tweets in region
-    sql='''
+    # fix me
+    sql="""
     SELECT a.locbinid,a.cityid,a.beercount, us.fullname, us.lat, us.lng
     FROM ( 
        SELECT p.locbinid,p.cityid,count(p.beerid) as beercount
@@ -82,57 +97,55 @@ def getRegionExample(con):
     ON a.cityid=us.cityid
     GROUP BY a.locbinid
     ORDER BY a.beercount
-    '''
-    df=pd.io.sql.read_sql(sql,con)
+    """
+    df=pd.read_sql(sql, engine)
     return df
 
-def outputRegionPoints(con):
+
+def output_region_points():
     # output in json like formate the region id's, names, and lat+lon
-    df=getRegionExample(con)
-    df=df.set_index('locbinid') #index by region
-    inds=list(df.index)
-    bc=df.beercount.tolist()
-    fn=df.fullname.tolist()
-    lats=df.lat.tolist()
-    lngs=df.lng.tolist()
-    output=[]
+    df = get_region_example()
+    df = df.set_index('locbinid') #index by region
+    inds = list(df.index)
+    bc = df.beercount.tolist()
+    fn = df.fullname.tolist()
+    lats = df.lat.tolist()
+    lngs = df.lng.tolist()
+    output = []
     for i in xrange(len(df)):
-        output.append({'regionid':inds[i],\
-                       'beercount':bc[i],\
-                       'fullname':fn[i],\
-                       'lat':lats[i],\
-                       'lng':lngs[i],
-                       'similarity':bc[i]})
+        output.append({'regionid': inds[i],
+                       'beercount': bc[i],
+                       'fullname': fn[i],
+                       'lat': lats[i],
+                       'lng': lngs[i],
+                       'similarity': bc[i]})
     return output
 
 
-def getSimdata(con,regid):
+def get_simdata(regid):
     # get tf-idf similarity scores
-    tfidf=readTFIDF(con)
-    S,N=makeSimVec(tfidf,regid)
+    tfidf = read_tfidf()
+    S, N = make_sim_vec(tfidf, regid)
     # get labels and coordinates for region ids
-    rtitles=getRegionExample(con)
+    rtitles = get_region_example()
     # turn into a dictionary
-    a=rtitles.set_index('locbinid') #index by region
-    b=pd.DataFrame({'similarity':S},index=N)
-    combdf_raw=a.join(b) # joined on index so now combdf.ix[regid] has all
-    combdf=combdf_raw.sort(columns='similarity',ascending=False)
+    a = rtitles.set_index('locbinid')  # index by region
+    b = pd.DataFrame({'similarity': S}, index=N)
+    combdf_raw=a.join(b)  # joined on index so now combdf.ix[regid] has all
+    combdf = combdf_raw.sort_values('similarity', ascending=False)
     inds=list(combdf.index)
-    bc=combdf.beercount.tolist()
-    fn=combdf.fullname.tolist()
-    lats=combdf.lat.tolist()
-    lngs=combdf.lng.tolist()
-    sim=combdf.similarity.tolist()
-    output=[]
+    bc = combdf.beercount.tolist()
+    fn = combdf.fullname.tolist()
+    lats = combdf.lat.tolist()
+    lngs = combdf.lng.tolist()
+    sim = combdf.similarity.tolist()
+    output = []
     taketop = np.minimum(len(N),20)
     for i in xrange(taketop):
-        output.append({'regionid':inds[i],\
-                       'beercount':bc[i],\
-                       'fullname':fn[i],\
-                       'lat':lats[i],\
-                       'lng':lngs[i],
-                       'similarity':sim[i]})
-    
-    
+        output.append({'regionid': inds[i],
+                       'beercount': bc[i],
+                       'fullname': fn[i],
+                       'lat': lats[i],
+                       'lng': lngs[i],
+                       'similarity': sim[i]})
     return output
-    
