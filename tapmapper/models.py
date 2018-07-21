@@ -147,3 +147,14 @@ class Zips(Base):
     lat = Column(Float(asdecimal=True))
     lng = Column(Float(asdecimal=True))
 
+
+class RegionReps(Base):
+    __tablename__ = 'region_reps'
+
+    id = Column(Integer, primary_key=True)
+    region_id = Column(Integer)
+    city_id = Column(Integer)
+    beercount = Column(Integer)
+    fullname = Column(String(150))
+    lat = Column(Float(asdecimal=True))
+    lng = Column(Float(asdecimal=True))
