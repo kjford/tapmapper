@@ -1,0 +1,28 @@
+DROP TABLE IF EXISTS region_reps;
+CREATE TABLE region_reps (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    region_id INT,
+    city_id INT,
+    beercount INT,
+    fullname VARCHAR(150),
+    lat DOUBLE,
+    lng DOUBLE
+);
+INSERT INTO region_reps
+(region_id, city_id, beercount, fullname, lat, lng)
+SELECT a.locbinid
+    , a.cityid
+    , a.beercount
+    , us.fullname
+    , us.lat
+    , us.lng
+FROM (
+   SELECT p.locbinid,p.cityid,count(p.beerid) as beercount
+   FROM procbintweets as p
+   GROUP BY p.cityid
+   ORDER BY beercount DESC
+   ) as a
+JOIN uscities AS us
+ON a.cityid=us.cityid
+GROUP BY a.locbinid
+ORDER BY a.beercount;

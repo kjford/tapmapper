@@ -1,7 +1,7 @@
 """
 Compute cosine similarity between regions from TFIDF scores across beers
 """
-from tapmapper.database import session_scope, engine
+from tapmapper.database import session_scope
 from tapmapper import models as m
 import pandas as pd
 import numpy as np
@@ -84,21 +84,15 @@ def make_sim_vec(df, regid):
 
 def get_region_example():
     # look up in database the city with most tweets in region
-    # fix me
-    sql="""
-    SELECT a.locbinid,a.cityid,a.beercount, us.fullname, us.lat, us.lng
-    FROM ( 
-       SELECT p.locbinid,p.cityid,count(p.beerid) as beercount
-       FROM procbintweets as p
-       GROUP BY p.cityid
-       ORDER BY beercount DESC
-       ) as a
-    JOIN uscities AS us
-    ON a.cityid=us.cityid
-    GROUP BY a.locbinid
-    ORDER BY a.beercount
-    """
-    df=pd.read_sql(sql, engine)
+    with session_scope() as s:
+        q = s.query(m.RegionReps)
+        data = [{'locbinid': x.region_id,
+                 'cityid': x.city_id,
+                 'beercount': x.beercount,
+                 'fullname': x.fullname,
+                 'lat': x.lat,
+                 'lng': x.lng} for x in q]
+    df = pd.DataFrame(data)
     return df
 
 
